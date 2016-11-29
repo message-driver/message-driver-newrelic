@@ -1,7 +1,7 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'message_driver/newrelic/version'
+require 'message_driver/new_relic/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "message-driver-newrelic"

@@ -1,4 +1,4 @@
-require "message_driver/newrelic/version"
+require "message_driver/new_relic/version"
 
 module MessageDriver
   module NewRelic

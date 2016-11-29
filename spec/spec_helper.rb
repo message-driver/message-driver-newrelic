@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "message_driver/newrelic"
+require "message_driver/new_relic"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
