@@ -1,5 +1,5 @@
-require "message_driver/new_relic/version"
-require "newrelic_rpm"
+require 'message_driver/new_relic/version'
+require 'message_driver/new_relic/instrumentation'
 
 module MessageDriver
   module NewRelic

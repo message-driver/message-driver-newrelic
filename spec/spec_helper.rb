@@ -1,10 +1,31 @@
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+require "message_driver"
 require "message_driver/new_relic"
 
+begin
+  require "pry"
+rescue LoadError
+  puts 'pry not loaded'
+end
+
+NewRelic::Agent.require_test_helper
+
+Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
+
 RSpec.configure do |config|
+  config.before(:suite) do
+    with_debug_logging do
+      DependencyDetection.detect!
+    end
+  end
+  config.before do
+    NewRelic::Agent.drop_buffered_data
+  end
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
+  config.expect_with :minitest
 
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
@@ -22,10 +43,6 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = "spec/examples.txt"
 
   config.disable_monkey_patching!
-
-  # This setting enables warnings. It's recommended, but in some cases may
-  # be too noisy due to issues in dependencies.
-  config.warnings = true
 
   if config.files_to_run.one?
     # Use the documentation formatter for detailed output,
