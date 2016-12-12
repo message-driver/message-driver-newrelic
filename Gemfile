@@ -5,7 +5,7 @@ gemspec
 
 gem 'message-driver', git: 'https://github.com/message-driver/message-driver.git', branch: 'development'
 
-group "development" do
+group "tools" do
   gem "pry"
   gem "pry-byebug"
   gem "guard-rspec"
