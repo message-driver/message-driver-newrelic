@@ -1,8 +1,8 @@
-# Message::Driver::Newrelic
+# MessageDriver::Newrelic
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/message/driver/newrelic`. To experiment with that code, run `bin/console` for an interactive prompt.
+[NewRelic APM](https://newrelic.com/) integration for [MessageDriver](https://github.com/message-driver/message-driver)
 
-TODO: Delete this and the text above, and describe your gem
+[![Build Status](https://travis-ci.org/message-driver/message-driver-newrelic.svg?branch=master)](https://travis-ci.org/message-driver/message-driver-newrelic)
 
 ## Installation
 
@@ -22,7 +22,7 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+That's all! This gem hooks into newrelic_rpm's dependency detection and is setup and configured from there.
 
 ## Development
 
@@ -32,5 +32,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/message-driver-newrelic.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/message-driver/message-driver-newrelic.
