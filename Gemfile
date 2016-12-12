@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in message-driver-newrelic.gemspec
 gemspec
 
-gem 'message-driver', git: 'git@github.com:message-driver/message-driver.git', branch: 'development'
+gem 'message-driver', git: 'https://github.com/message-driver/message-driver.git', branch: 'development'
 
 group "development" do
   gem "pry"
