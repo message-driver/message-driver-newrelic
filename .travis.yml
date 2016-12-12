@@ -6,3 +6,5 @@ rvm:
   - 2.0
   - 1.9.3
 before_install: gem install bundler
+bundler_args: --without development
+script: bundle exec rake
