@@ -3,13 +3,12 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in message-driver-newrelic.gemspec
 gemspec
 
-gem 'message-driver', git: 'https://github.com/message-driver/message-driver.git', branch: 'development'
-
 group "tools" do
+  gem "appraisal"
   gem "pry"
   gem "pry-byebug"
   gem "guard-rspec"
-  install_if -> { RUBY_PLATFORM =~ /darwin/ } do
+  if RUBY_PLATFORM =~ /darwin/
     gem "ruby_gntp"
   end
 end
