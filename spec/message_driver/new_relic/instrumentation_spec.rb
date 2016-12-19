@@ -50,6 +50,10 @@ RSpec.describe MessageDriver::NewRelic::Instrumentation do
       MessageDriver::Client.consumer(:my_consumer, &consumer)
     end
 
+    after(:context) do
+      MessageDriver::Broker.reset
+    end
+
     after do
       MessageDriver::Broker.reset_after_tests
     end
@@ -241,6 +245,69 @@ RSpec.describe MessageDriver::NewRelic::Instrumentation do
         Datastore/operation/MessageDriver/consumer_count
         Datastore/statement/MessageDriver/#{queue_name}/consumer_count
       })
+    end
+  end
+
+  context "when the in_memory adapter is used" do
+    after do
+      MessageDriver::Broker.reset_after_tests
+      MessageDriver::Broker.reset
+    end
+
+    let(:destination_key) { :my_queue }
+    let(:queue_name) { 'my.test.queue' }
+    let(:consumer_key) { :my_consumer }
+
+    it "doesn't break us sending messages and receiving them on consumers" do
+      MessageDriver::Broker.configure(:default, adapter: :in_memory)
+      MessageDriver::Broker.define(:default) do |b|
+        b.destination(destination_key, queue_name)
+      end
+
+      consumed_messages = []
+      MessageDriver::Client.consumer(consumer_key) do |msg|
+        consumed_messages << msg
+      end
+
+      destination = MessageDriver::Client.find_destination(destination_key)
+
+      destination.publish("message to pop")
+
+      expect(destination.message_count).to eq(1)
+      expect(destination.consumer_count).to eq(0)
+
+      popped_message = destination.pop_message
+      expect(popped_message.body).to eq("message to pop")
+
+      expect(destination.message_count).to eq(0)
+      expect(destination.consumer_count).to eq(0)
+
+      popped_message2 = destination.pop_message
+      expect(popped_message2).to be_nil
+
+      error_handler = lambda do |err, _|
+        raise err
+      end
+
+      subscription = MessageDriver::Client.subscribe(destination_key, consumer_key, error_handler: error_handler)
+
+      expect(destination.message_count).to eq(0)
+      expect(destination.consumer_count).to eq(1)
+
+      destination.publish("message to consume")
+
+      expect(consumed_messages.size).to eq(1)
+
+      consumed_message = consumed_messages.first
+      expect(consumed_message.body).to eq("message to consume")
+
+      expect(destination.message_count).to eq(0)
+      expect(destination.consumer_count).to eq(1)
+
+      subscription.unsubscribe
+
+      expect(destination.message_count).to eq(0)
+      expect(destination.consumer_count).to eq(0)
     end
   end
 end

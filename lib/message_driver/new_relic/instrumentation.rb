@@ -4,10 +4,11 @@ require 'new_relic/agent/datastores'
 module MessageDriver
   module NewRelic
     module Instrumentation
-      DESTINATION_OPS = %w(publish pop_message subscribe message_count consumer_count).map!(&:freeze).freeze
+      DESTINATION_OPS = %w(publish pop_message message_count consumer_count).map!(&:freeze).freeze
+      DESTINATION_BLOCK_OPS = %w(subscribe).map!(&:freeze).freeze
       MESSAGE_OPS = %w(ack_message nack_message).map!(&:freeze).freeze
       BROKER_OPS = %w(begin_transaction commit_transaction rollback_transaction).map!(&:freeze).freeze
-      OPTS_TO_OVERRIDE = (DESTINATION_OPS + MESSAGE_OPS + BROKER_OPS).freeze
+      OPTS_TO_OVERRIDE = (DESTINATION_OPS + DESTINATION_BLOCK_OPS + MESSAGE_OPS + BROKER_OPS).freeze
 
       DESTINATION_OPS.each do |op|
         define_method "#{op}_with_newrelic" do |*args|
@@ -22,8 +23,21 @@ module MessageDriver
         end
       end
 
+      DESTINATION_BLOCK_OPS.each do |op|
+        define_method "#{op}_with_newrelic" do |*args, &block|
+          destination_name = args[0].nil? ? nil : args[0].name
+          callback = proc do |result, metric, elapsed|
+            ::NewRelic::Agent::Datastores.notice_statement([op, destination_name].inspect, elapsed)
+          end
+
+          ::NewRelic::Agent::Datastores.wrap('MessageDriver', op, destination_name, callback) do
+            send(:"#{op}_without_newrelic", *args, &block)
+          end
+        end
+      end
+
       MESSAGE_OPS.each do |op|
-        define_method "#{op}_with_newrelic" do |*args|
+        define_method "#{op}_with_newrelic" do |*args, &block|
           destination_name = args[0].nil? ? nil : args[0].destination.name
           callback = proc do |result, metric, elapsed|
             ::NewRelic::Agent::Datastores.notice_statement([op, destination_name].inspect, elapsed)
@@ -36,14 +50,14 @@ module MessageDriver
       end
 
       BROKER_OPS.each do |op|
-        define_method "#{op}_with_newrelic" do |*args|
+        define_method "#{op}_with_newrelic" do |*args, &block|
           broker_name = adapter.broker.name
           callback = proc do |result, metric, elapsed|
             ::NewRelic::Agent::Datastores.notice_statement([op].inspect, elapsed)
           end
 
           ::NewRelic::Agent::Datastores.wrap('MessageDriver', op, broker_name, callback) do
-            send(:"#{op}_without_newrelic", *args)
+            send(:"#{op}_without_newrelic", *args, &block)
           end
         end
       end
