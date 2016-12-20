@@ -14,6 +14,8 @@ matrix:
   fast_finish: true
   allow_failures:
     - gemfile: gemfiles/message_driver_development.gemfile
-before_install: gem install bundler
+before_install:
+  - gem install bundler
+  - ruby -rubygems -e "if RUBY_VERSION > '2.2' && Gem::VERSION < '2.5.2'; exec 'gem update --system 2.5.2'; end"
 bundler_args: --without tools
 script: bundle exec rake
